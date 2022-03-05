@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ClientProcessing": {
+      "commandName": "Project",
+      "commandLineArgs": "Sports"
+    }
+  }
+}
