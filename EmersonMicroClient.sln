@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31613.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientProcessing", "ClientProcessing\ClientProcessing.csproj", "{41636093-CD33-427A-808A-C2F1BFE840F8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clientProcessing", "ClientProcessing\clientProcessing.csproj", "{41636093-CD33-427A-808A-C2F1BFE840F8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

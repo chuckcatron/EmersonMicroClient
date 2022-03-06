@@ -1,43 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NetMQ;
-using NetMQ.Sockets;
+﻿using clientProcessing.DAL;
+using clientProcessing.Helpers;
+using clientProcessing.Interfaces;
+using clientProcessing.MessageCenter;
+using clientProcessing.Models;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-namespace SubscriberA
+namespace clientProcessing
 {
     class Program
     {
-        public static IList<string> allowableCommandLineArgs
-            = new[] {"Sports", "News", "All"};
-
         static void Main(string[] args)
         {
-            if (args.Length != 1 || !allowableCommandLineArgs.Contains(args[0]))
-            {
-                Console.WriteLine("Expected one argument, either " +
-                                  "'Sports', 'News' or 'All'");
-                Environment.Exit(-1);
-            }
+            var services = new ServiceCollection();
+            ConfigureServices(services);
 
-            string topic = args[0] == "All" ? "" : args[0];
-            Console.WriteLine("Subscriber started for Topic : {0}", topic);
-            using (var subSocket = new SubscriberSocket())
-            {
-                subSocket.Options.ReceiveHighWatermark = 1000;
-                subSocket.Connect("tcp://127.0.0.1:3000");
-                subSocket.Subscribe(topic);
-                Console.WriteLine("Subscriber socket connecting...");
-                while (true)
+            using ServiceProvider serviceProvider = services.BuildServiceProvider();
+            ClientProcessing app = serviceProvider.GetService<ClientProcessing>();
+            // Start up logic here
+            app?.Run();
+        }
+
+        private static void ConfigureServices(ServiceCollection services)
+        {
+            services
+                .AddLogging(configure =>
                 {
-                    string messageTopicReceived = subSocket.ReceiveFrameString();
-                    string messageReceived = subSocket.ReceiveFrameString();
-                    Console.WriteLine(messageReceived);
-                }
-            }
+                    configure.AddConsole();
+                    configure.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Critical);
+                })
+                .AddTransient<ClientProcessing>()
+                .AddDbContext<centraldbContext>()
+                .AddSingleton<ISubSocket, SubSocket>()
+                .AddSingleton<IScreenHelper, ScreenHelper>()
+                .AddSingleton<IFlowRouting, FlowRouting>()
+                .AddSingleton<IChannelRepository, ChannelRepository>()
+                .BuildServiceProvider();
         }
     }
 }
