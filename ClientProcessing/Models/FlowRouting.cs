@@ -12,11 +12,13 @@ namespace clientProcessing.Models
         private readonly IChannelRepository _channelRepository;
         private readonly ISubSocket _subSocket;
 
+        public bool HasSubscribed { get; set; }
         public FlowRouting(IScreenHelper screenHelper, IChannelRepository channelRepository, ISubSocket subSocket)
         {
             _screenHelper = screenHelper;
             _channelRepository = channelRepository;
             _subSocket = subSocket;
+            HasSubscribed = false;
         }
 
         public UserFlow GetRolling()
@@ -79,7 +81,14 @@ namespace clientProcessing.Models
                 }
                 else if (input == "2")
                 {
-                    DoListen();
+                    if (HasSubscribed)
+                    {
+                        DoListen();
+                    }
+                    else
+                    {
+                        HandleInvalidResponse("You have subscribed to any channels");
+                    }
                 }
             }
 
@@ -201,13 +210,18 @@ namespace clientProcessing.Models
             _screenHelper.Print("Channel name? ");
             _screenHelper.Print("Enter channel name or <Enter> to go back");
             var name = Console.ReadLine();
-            name = name == "All" ? "" : name;
-            _subSocket.Subscribe(name);
+            if (name != "")
+            {
+                name = name == "All" ? "" : name;
+                _subSocket.Subscribe(name);
+                HasSubscribed = true;
+            }
         }
 
-        public void HandleInvalidResponse()
+        public void HandleInvalidResponse(string message)
         {
             Console.WriteLine("---Try Again---");
+            Console.WriteLine(message);
             Console.WriteLine("<Return to continue>");
             Console.ReadLine();
         }
